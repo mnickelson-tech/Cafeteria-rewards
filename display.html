@@ -139,16 +139,16 @@
       to{ transform: translateY(115vh) rotate(520deg); opacity:0; }
     }
 
- /* +5 Banner Pop (polished projector look) */
+/* +5 Banner Pop (clean speech bubble version) */
 .banner-pop{
   position: fixed;
   left: 50%;
-  top: 18px;                 /* move it to the top instead of bottom */
-  transform: translateX(-50%) translateY(-16px) scale(0.98);
+  top: 90px;
+  transform: translateX(-50%) translateY(-14px) scale(0.98);
   opacity: 0;
   z-index: 9999;
   pointer-events: none;
-  width: min(820px, 92vw);   /* slightly smaller */
+  width: min(760px, 90vw);
 }
 
 .banner-pop.show{
@@ -162,32 +162,31 @@
 
 .banner-wrap{
   position: relative;
-  filter: drop-shadow(0 16px 28px rgba(0,0,0,0.35));
+  filter: drop-shadow(0 14px 26px rgba(0,0,0,0.35));
 }
 
 .banner-img{
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 18px;
 }
 
-/* Text placement tuned for your banner image */
+/* TEXT placement tuned for THIS image */
 .banner-text{
   position: absolute;
-  left: 12%;
-  top: 34%;
-  width: 56%;
+  left: 10%;
+  top: 36%;
+  width: 50%;
   text-align: left;
 
-  font-size: clamp(26px, 3.2vw, 52px);
-  line-height: 1.05;
-  letter-spacing: 0.3px;
+  font-size: clamp(28px, 3.4vw, 52px);
+  line-height: 1.1;
 
   color: #111;
   font-weight: 800;
-  text-shadow: 0 3px 0 rgba(255,255,255,0.85);
+  text-shadow: 0 3px 0 rgba(255,255,255,0.9);
 }
+
 
   </style>
 </head>
@@ -215,7 +214,7 @@
   <!-- +5 Celebration Banner -->
   <div id="bannerPop" class="banner-pop" aria-hidden="true">
     <div class="banner-wrap">
-      <img class="banner-img" src="https://mnickelson-tech.github.io/cafeteria-rewards/ruby-banner.png" alt="Ruby banner" />
+     <img class="banner-img" src="https://mnickelson-tech.github.io/cafeteria-rewards/ruby-banner-clean.png" alt="Ruby banner" />
       <div class="banner-text" id="bannerText">Grade ___ is ROCKIN’ it!</div>
     </div>
   </div>
@@ -308,8 +307,8 @@
       const txt = document.getElementById("bannerText");
       if(!pop || !txt) return;
 
-      txt.textContent = `Grade ${grade} is ROCKIN’ it!`;
-
+     txt.textContent = `Grade ${grade} is ROCKIN’ it!`;
+      
       pop.classList.remove("show");
       void pop.offsetWidth;
       pop.classList.add("show");
@@ -434,4 +433,5 @@
   </script>
 </body>
 </html>
+
 
