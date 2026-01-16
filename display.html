@@ -256,14 +256,14 @@
     const ref = db.ref("rewards");
 
     // ---- SOUND (unlock once) ----
-    let soundUnlocked = false;
+    let soundUnlocked = true;
 
     function unlockSound(){
       const s = document.getElementById("pointSound");
       if(!s) return;
 
       s.volume = 0.9;
-      s.currentTime = 0;
+      s.currentTime = 2;
 
       s.play().then(() => {
         s.pause();
@@ -307,7 +307,7 @@
       const txt = document.getElementById("bannerText");
       if(!pop || !txt) return;
 
-     txt.textContent = `Grade ${grade} is ROCKIN’ it!`;
+     txt.textContent = `Grade ${grade}`;
       
       pop.classList.remove("show");
       void pop.offsetWidth;
@@ -433,5 +433,6 @@
   </script>
 </body>
 </html>
+
 
 
