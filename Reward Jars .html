@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ruby’s Cafeteria Rewards — Display</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{ --navy:#0a1f44; --navy2:#102b5c; --red:#ff5252; }
+    body{
+      font-family:"Baloo 2", cursive;
+      margin:0; padding:18px;
+      color:#fff;
+      background:linear-gradient(var(--navy), var(--navy2));
+      text-align:center;
+    }
+    h1{ margin:6px 0 0; color:var(--red); font-size:44px; }
+    .sub{ margin:6px 0 14px; opacity:.95; font-size:20px; }
+
+    .toprow{
+      display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center;
+      margin: 10px 0 16px;
+    }
+    .badge{
+      background:rgba(255,255,255,.12);
+      border:2px solid rgba(255,255,255,.18);
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:16px;
+    }
+
+    .jars{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+      gap:16px;
+      align-items:start;
+      margin-top:6px;
+    }
+    .jar{
+      background:#fff;
+      color:var(--navy);
+      border-radius:22px;
+      padding:14px;
+      box-shadow:0 12px 26px rgba(0,0,0,.25);
+    }
+    .jar h3{ margin:6px 0 10px; font-size:22px; }
+    .jar-lid{
+      width:104px; height:24px; margin:0 auto;
+      background:var(--red);
+      border-radius:12px 12px 0 0;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
+    }
+    .jar-body{
+      width:100%; height:180px;
+      border:4px solid var(--navy);
+      border-radius:0 0 22px 22px;
+      margin-top:6px;
+      position:relative;
+      overflow:hidden;
+      background:#f7fbff;
+    }
+    .fill{
+      position:absolute; left:0; right:0; bottom:0;
+      height:0%;
+      background:linear-gradient(#ffb3b3, var(--red));
+      opacity:.35;
+      transition:height .6s ease;
+      z-index:1;
+    }
+    .tokens{
+      position:absolute; inset:0;
+      pointer-events:none;
+      z-index:3;
+    }
+    .token{
+      position:absolute;
+      width:16px; height:16px;
+      border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff7b0 0%, #ffd700 40%, #d4a400 100%);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+      transform: translate(-50%, -50%);
+    }
+    .points{
+      font-size:34px;
+      margin:10px 0 2px;
+    }
+    .tiny{ font-size:14px; opacity:.85; margin-top:6px; }
+
+    .leaderboard{
+      margin:18px auto 0;
+      max-width:980px;
+      background:#fff;
+      color:var(--navy);
+      border-radius:22px;
+      padding:14px;
+      box-shadow:0 12px 26px rgba(0,0,0,.22);
+      text-align:left;
+    }
+    .leaderboard h2{ text-align:center; margin:6px 0 10px; }
+    .lbgrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+      gap:10px;
+    }
+    .lbitem{
+      background:#f3f7ff;
+      border:2px dashed rgba(10,31,68,.25);
+      padding:10px 12px;
+      border-radius:16px;
+    }
+
+    .confetti{
+      position:fixed;
+      width:10px; height:10px;
+      border-radius:2px;
+      z-index:9999;
+      animation: fall 900ms linear forwards;
+    }
+    @keyframes fall{
+      to{ transform: translateY(115vh) rotate(520deg); opacity:0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🐦 Ruby’s Cafeteria Rewards</h1>
+  <div class="sub">Great expectations = great behavior 💙❤️</div>
+
+  <div class="toprow">
+    <div class="badge">📣 Display Mode (Projector)</div>
+    <div class="badge" id="status">Connecting…</div>
+    <div class="badge" id="lastUpdate">Last update: —</div>
+  </div>
+
+  <div class="jars" id="jars"></div>
+
+  <div class="leaderboard">
+    <h2>🏆 Leaderboard</h2>
+    <div class="lbgrid" id="leaderboard"></div>
+    <div class="tiny">This updates live when teachers add points.</div>
+  </div>
+
+  <!-- Firebase (v9 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0ZrYRin1oQrrgLlGlOxmHvS4eiWpEQgY",
+      authDomain: "cafeteria-rewards.firebaseapp.com",
+      databaseURL: "https://cafeteria-rewards-default-rtdb.firebaseio.com",
+      projectId: "cafeteria-rewards",
+      storageBucket: "cafeteria-rewards.firebasestorage.app",
+      messagingSenderId: "529945878029",
+      appId: "1:529945878029:web:2e6390e70b21770e07bf44",
+      measurementId: "G-2VJF6ER094"
+    };
+
+    const grades = ["PK","K","1","2","3","4","5","6"];
+    const maxPoints = 50;
+    const MAX_VISIBLE_TOKENS = 80;
+
+    const jarsEl = document.getElementById("jars");
+    const statusEl = document.getElementById("status");
+    const lastUpdateEl = document.getElementById("lastUpdate");
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const ref = db.ref("rewards");
+
+    function slotPosition(jarEl, index){
+      const rect = jarEl.getBoundingClientRect();
+      const size = 16, padX = 14, padBottom = 10, gap = 4;
+      const usableW = rect.width - padX*2;
+      const cols = Math.max(1, Math.floor(usableW / (size + gap)));
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+      const x = padX + (col + 0.5) * (usableW / cols);
+      const yFromBottom = (row + 0.5) * (size + gap);
+      const y = rect.height - padBottom - yFromBottom;
+      const jitter = (n) => (Math.sin((index+1)*999) * 0.5 + 0.5) * n - n/2;
+      return { left: x + jitter(6), top: y + jitter(6) };
+    }
+
+    function drawTokens(grade, count){
+      const jarEl = document.getElementById("jar_" + grade);
+      const layer = document.getElementById("tokens_" + grade);
+      if(!jarEl || !layer) return;
+
+      const visible = Math.min(count, MAX_VISIBLE_TOKENS);
+      layer.innerHTML = "";
+      for(let i=0;i<visible;i++){
+        const t = document.createElement("div");
+        t.className = "token";
+        const pos = slotPosition(jarEl, i);
+        t.style.left = pos.left + "px";
+        t.style.top  = pos.top  + "px";
+        layer.appendChild(t);
+      }
+    }
+
+    function confetti(){
+      const colors = ["#ff5252","#ffd700","#4caf50","#2196f3","#ff8a65","#ab47bc"];
+      for(let i=0;i<26;i++){
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random()*100 + "vw";
+        c.style.top  = (-10 - Math.random()*20) + "px";
+        c.style.background = colors[Math.floor(Math.random()*colors.length)];
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(), 950);
+      }
+    }
+
+    function renderUI(){
+      jarsEl.innerHTML = "";
+      grades.forEach(g=>{
+        const card = document.createElement("div");
+        card.className = "jar";
+        card.innerHTML = `
+          <h3>Grade ${g}</h3>
+          <div class="jar-lid"></div>
+          <div class="jar-body" id="jar_${g}">
+            <div class="fill" id="fill_${g}"></div>
+            <div class="tokens" id="tokens_${g}"></div>
+          </div>
+          <div class="points" id="pts_${g}">0</div>
+          <div class="tiny">Tokens stack as points grow</div>
+        `;
+        jarsEl.appendChild(card);
+      });
+    }
+
+    function updateLeaderboard(points){
+      const board = document.getElementById("leaderboard");
+      board.innerHTML = "";
+      const sorted = [...grades].sort((a,b)=>(points[b]||0)-(points[a]||0));
+      sorted.forEach(g=>{
+        const item = document.createElement("div");
+        item.className = "lbitem";
+        item.innerHTML = `<strong>Grade ${g}</strong><br>${points[g]||0} points`;
+        board.appendChild(item);
+      });
+    }
+
+    let lastTs = 0;
+    renderUI();
+
+    ref.on("value", snap=>{
+      statusEl.textContent = "✅ Live";
+      const data = snap.val() || {};
+      const points = data.points || {};
+      const event = data.lastEvent || null;
+
+      grades.forEach(g=>{
+        const v = points[g] || 0;
+        const ptsEl = document.getElementById("pts_"+g);
+        const fillEl = document.getElementById("fill_"+g);
+        if(ptsEl) ptsEl.textContent = v;
+        if(fillEl) fillEl.style.height = Math.min((v/maxPoints)*100, 100) + "%";
+        drawTokens(g, v);
+      });
+
+      updateLeaderboard(points);
+
+      if(event && event.ts && event.ts > lastTs){
+        lastTs = event.ts;
+        lastUpdateEl.textContent = "Last update: " + new Date(event.ts).toLocaleTimeString();
+        if(event.type === "add") confetti();
+      } else {
+        lastUpdateEl.textContent = "Last update: " + new Date().toLocaleTimeString();
+      }
+    }, err=>{
+      statusEl.textContent = "⚠️ Not connected";
+      console.error(err);
+    });
+
+    window.addEventListener("resize", ()=>{
+      ref.get().then(snap=>{
+        const data = snap.val() || {};
+        const points = (data.points || {});
+        grades.forEach(g => drawTokens(g, points[g]||0));
+      });
+    });
+  </script>
+</body>
+</html>
