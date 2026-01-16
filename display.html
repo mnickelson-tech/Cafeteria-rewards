@@ -139,48 +139,56 @@
       to{ transform: translateY(115vh) rotate(520deg); opacity:0; }
     }
 
-    /* +5 Banner Pop */
-    .banner-pop{
-      position: fixed;
-      left: 50%;
-      bottom: 20px;
-      transform: translateX(-50%) translateY(30px) scale(0.98);
-      opacity: 0;
-      z-index: 9999;
-      pointer-events: none;
-      width: min(900px, 94vw);
-    }
-    .banner-pop.show{
-      opacity: 1;
-      animation: bannerIn 220ms ease-out forwards;
-    }
-    @keyframes bannerIn{
-      to { transform: translateX(-50%) translateY(0) scale(1); }
-    }
-    .banner-wrap{
-      position: relative;
-      filter: drop-shadow(0 18px 30px rgba(0,0,0,0.35));
-    }
-    .banner-img{
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 18px;
-    }
-    .banner-text{
-      position: absolute;
-      z-index: 2;
-      left: 6.5%;
-      top: 36%;
-      width: 70%;
-      text-align: left;
-      font-size: clamp(22px, 3.6vw, 54px);
-      color: #111;
-      font-weight: 700;
-      text-shadow: 0 3px 0 rgba(255,255,255,0.75);
-    }
+ /* +5 Banner Pop (polished projector look) */
+.banner-pop{
+  position: fixed;
+  left: 50%;
+  top: 18px;                 /* move it to the top instead of bottom */
+  transform: translateX(-50%) translateY(-16px) scale(0.98);
+  opacity: 0;
+  z-index: 9999;
+  pointer-events: none;
+  width: min(820px, 92vw);   /* slightly smaller */
+}
+
+.banner-pop.show{
+  opacity: 1;
+  animation: bannerIn 220ms ease-out forwards;
+}
+
+@keyframes bannerIn{
+  to { transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.banner-wrap{
+  position: relative;
+  filter: drop-shadow(0 16px 28px rgba(0,0,0,0.35));
+}
+
+.banner-img{
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+}
+
+/* Text placement tuned for your banner image */
+.banner-text{
+  position: absolute;
+  left: 12%;
+  top: 34%;
+  width: 56%;
+  text-align: left;
+
+  font-size: clamp(26px, 3.2vw, 52px);
+  line-height: 1.05;
+  letter-spacing: 0.3px;
+
+  color: #111;
+  font-weight: 800;
+  text-shadow: 0 3px 0 rgba(255,255,255,0.85);
+}
+
   </style>
 </head>
 
@@ -426,3 +434,4 @@
   </script>
 </body>
 </html>
+
