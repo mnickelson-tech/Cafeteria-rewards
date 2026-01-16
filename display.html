@@ -110,6 +110,87 @@
       padding:10px 12px;
       border-radius:16px;
     }
+    /* Ruby pop animation overlay */
+.ruby-pop{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 320px;
+  max-width: 90vw;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  z-index: 9998;
+}
+
+.ruby-pop.show{
+  opacity: 1;
+  animation: rubyPopIn 220ms ease-out forwards;
+}
+
+@keyframes rubyPopIn{
+  to { transform: translateY(0) scale(1); }
+}
+
+.ruby-bubble{
+  position: relative;
+  background: rgba(255,255,255,0.97);
+  color: #0a1f44;
+  border-radius: 22px;
+  padding: 12px 12px 8px;
+  box-shadow: 0 16px 34px rgba(0,0,0,0.25);
+  border: 3px solid rgba(255,82,82,0.35);
+  overflow: hidden;
+}
+
+.ruby-say{
+  font-size: 18px;
+  margin: 2px 0 6px;
+}
+
+.ruby-svg{
+  width: 240px;
+  height: 240px;
+  display: block;
+  margin: 0 auto;
+  animation: rubyBounce 1.2s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+
+@keyframes rubyBounce{
+  0%, 100%{ transform: translateY(0); }
+  50%{ transform: translateY(-8px); }
+}
+
+.ruby-wing{
+  transform-origin: 50% 50%;
+  animation: rubyFlap 320ms ease-in-out infinite;
+}
+.ruby-wing-left{ transform-origin: 62px 148px; }
+.ruby-wing-right{ transform-origin: 158px 148px; }
+
+@keyframes rubyFlap{
+  0%,100%{ transform: rotate(0deg); }
+  50%{ transform: rotate(8deg); }
+}
+
+/* sparkles */
+.ruby-spark{
+  position:absolute;
+  font-size: 20px;
+  opacity: 0;
+  animation: sparkle 900ms ease-out infinite;
+}
+.ruby-spark-1{ left: 18px; top: 54px; animation-delay: 0ms; }
+.ruby-spark-2{ right: 18px; top: 72px; animation-delay: 220ms; }
+.ruby-spark-3{ right: 56px; top: 24px; animation-delay: 120ms; }
+
+@keyframes sparkle{
+  0%{ transform: translateY(8px) scale(0.8); opacity: 0; }
+  35%{ opacity: 1; }
+  100%{ transform: translateY(-10px) scale(1.1); opacity: 0; }
+}
+
 
     .confetti{
       position:fixed;
@@ -136,6 +217,71 @@
     <div class="badge" id="status">Connecting…</div>
     <div class="badge" id="lastUpdate">Last update: —</div>
   </div>
+  <!-- Ruby Mascot Pop (appears on big moments like +5) -->
+<div id="rubyPop" class="ruby-pop" aria-hidden="true">
+  <div class="ruby-bubble">
+    <div class="ruby-say">Ruby says: Nice job! ⭐</div>
+
+    <!-- Cute Ruby (SVG) -->
+    <svg class="ruby-svg" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <!-- shadow -->
+      <ellipse cx="110" cy="200" rx="60" ry="10" fill="rgba(0,0,0,0.15)"/>
+
+      <!-- body -->
+      <ellipse cx="110" cy="130" rx="62" ry="70" fill="#ff5252"/>
+      <ellipse cx="110" cy="150" rx="36" ry="45" fill="#ff9a9a" opacity="0.75"/>
+
+      <!-- head -->
+      <circle cx="110" cy="70" r="52" fill="#ff5252"/>
+
+      <!-- crest -->
+      <path d="M85 28 C95 8, 110 8, 116 30 C106 26, 96 26, 85 28Z" fill="#ff6b6b"/>
+      <path d="M105 24 C120 4, 138 10, 140 34 C128 26, 116 24, 105 24Z" fill="#ff6b6b"/>
+
+      <!-- face patch -->
+      <path d="M75 74 C90 58, 130 58, 145 74 C130 95, 90 95, 75 74Z" fill="#ffffff" opacity="0.95"/>
+
+      <!-- eyes -->
+      <g>
+        <circle cx="92" cy="72" r="12" fill="#0a1f44"/>
+        <circle cx="92" cy="68" r="4" fill="#ffffff"/>
+        <circle cx="128" cy="72" r="12" fill="#0a1f44"/>
+        <circle cx="128" cy="68" r="4" fill="#ffffff"/>
+      </g>
+
+      <!-- beak -->
+      <path d="M110 86 L150 98 L110 110 L110 86Z" fill="#ffd700" stroke="#d4a400" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M110 98 L150 98" stroke="#d4a400" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- wings (animated) -->
+      <g class="ruby-wing ruby-wing-left">
+        <path d="M58 120 C25 130, 18 160, 40 176 C54 168, 66 154, 72 140 C74 132, 70 124, 58 120Z"
+              fill="#ff3b3b"/>
+        <path d="M50 140 C38 146, 36 160, 46 168" stroke="rgba(10,31,68,0.25)" stroke-width="6" stroke-linecap="round"/>
+      </g>
+
+      <g class="ruby-wing ruby-wing-right">
+        <path d="M162 120 C195 130, 202 160, 180 176 C166 168, 154 154, 148 140 C146 132, 150 124, 162 120Z"
+              fill="#ff3b3b"/>
+        <path d="M170 140 C182 146, 184 160, 174 168" stroke="rgba(10,31,68,0.25)" stroke-width="6" stroke-linecap="round"/>
+      </g>
+
+      <!-- feet -->
+      <path d="M86 200 C88 186, 96 182, 104 186" stroke="#d4a400" stroke-width="6" stroke-linecap="round"/>
+      <path d="M134 200 C132 186, 124 182, 116 186" stroke="#d4a400" stroke-width="6" stroke-linecap="round"/>
+
+      <!-- navy outline accents -->
+      <circle cx="110" cy="70" r="52" fill="none" stroke="rgba(10,31,68,0.18)" stroke-width="6"/>
+      <ellipse cx="110" cy="130" rx="62" ry="70" fill="none" stroke="rgba(10,31,68,0.18)" stroke-width="6"/>
+    </svg>
+
+    <!-- little sparkles -->
+    <div class="ruby-spark ruby-spark-1">✨</div>
+    <div class="ruby-spark ruby-spark-2">✨</div>
+    <div class="ruby-spark ruby-spark-3">⭐</div>
+  </div>
+</div>
+
 
   <div class="jars" id="jars"></div>
 
@@ -172,6 +318,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const ref = db.ref("rewards");
+
+    function showRuby(message){
+  const pop = document.getElementById("rubyPop");
+  if(!pop) return;
+
+  const say = pop.querySelector(".ruby-say");
+  if(say && message) say.textContent = message;
+
+  pop.classList.add("show");
+
+  // hide after 2 seconds
+  clearTimeout(window.__rubyTimer);
+  window.__rubyTimer = setTimeout(() => {
+    pop.classList.remove("show");
+  }, 2000);
+}
 
     function slotPosition(jarEl, index){
       const rect = jarEl.getBoundingClientRect();
@@ -210,18 +372,20 @@
   s.play().catch(()=>{});
 }
 
-    function confetti(){
-      const colors = ["#ff5252","#ffd700","#4caf50","#2196f3","#ff8a65","#ab47bc"];
-      for(let i=0;i<26;i++){
-        const c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random()*100 + "vw";
-        c.style.top  = (-10 - Math.random()*20) + "px";
-        c.style.background = colors[Math.floor(Math.random()*colors.length)];
-        document.body.appendChild(c);
-        setTimeout(()=>c.remove(), 950);
-      }
-    }
+ function confetti(){
+  const colors = ["#ff5252","#ffd700","#4caf50","#2196f3","#ff8a65","#ab47bc"];
+  for(let i=0;i<60;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random()*100 + "vw";
+    c.style.top  = (-10 - Math.random()*30) + "px";
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.width = (8 + Math.random()*6) + "px";
+    c.style.height = c.style.width;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 1100);
+  }
+}
 
     function renderUI(){
       jarsEl.innerHTML = "";
@@ -277,11 +441,16 @@
     if(event && event.ts && event.ts > lastTs){
   lastTs = event.ts;
   lastUpdateEl.textContent = "Last update: " + new Date(event.ts).toLocaleTimeString();
-  if(event.type === "add"){
-    confetti();
-    playPointSound();
+ if(event.type === "add"){
+  confetti();
+  playPointSound();
+
+  // Ruby shows up for big adds (like +5)
+  if((event.amount || 1) >= 5){
+    showRuby(`Ruby says: Grade ${event.grade} is ROCKIN’ it! ⭐`);
   }
 }
+
       } else {
         lastUpdateEl.textContent = "Last update: " + new Date().toLocaleTimeString();
       }
@@ -300,4 +469,5 @@
   </script>
 </body>
 </html>
+
 
