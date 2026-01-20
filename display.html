@@ -224,6 +224,20 @@
   background-color: #c62828; /* Cardinal red */
   box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
+    .token.drop {
+  animation: dropIn 450ms ease-out;
+}
+
+@keyframes dropIn {
+  0% {
+    transform: translateY(-20px) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
   </style>
 </head>
 
@@ -403,7 +417,7 @@
       return { left: x + jitter(4), top: y + jitter(4) };
     }
 
-    function drawTokens(grade, count){
+    function drawTokens(grade, state.totals[grade], amount);
       const maskEl = document.querySelector(`#jar_${grade} .jar-mask`);
       const layer = document.getElementById("tokens_" + grade);
       if(!maskEl || !layer) return;
@@ -411,14 +425,25 @@
       const visible = Math.min(count, MAX_VISIBLE_TOKENS);
       layer.innerHTML = "";
 
-      for(let i=0;i<visible;i++){
-        const t = document.createElement("div");
-        t.className = "token";
-        const pos = slotPosition(maskEl, i);
-        t.style.left = pos.left + "px";
-        t.style.top  = pos.top  + "px";
-        layer.appendChild(t);
-      }
+   const startDropIndex = Math.max(0, visible - added);
+
+for (let i = 0; i < visible; i++) {
+  const t = document.createElement("div");
+  t.classList.add("token");
+
+  // 👇 only NEW tokens get the drop animation
+  if (added > 0 && i >= startDropIndex) {
+    t.classList.add("drop");
+  }
+if (amount === 5 && i >= startDropIndex) {
+  t.style.animationDuration = "600ms";
+}
+  const pos = slotPosition(maskEl, i);
+  t.style.left = pos.left + "px";
+  t.style.top = pos.top + "px";
+
+  layer.appendChild(t);
+}
     }
 
     function renderUI(){
@@ -519,6 +544,7 @@
   </script>
 </body>
 </html>
+
 
 
 
