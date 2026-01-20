@@ -217,16 +217,15 @@
       pointer-events: none;
     }
 
- .token{
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background-color: #c62828; /* Cardinal red */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
-  opacity: 1;
+.token{
+  position:absolute;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#c62828;
+  box-shadow:0 2px 4px rgba(0,0,0,0.25);
 }
-
+    
 .token.drop{
   animation: dropIn 450ms ease-out;
 }
@@ -348,14 +347,13 @@
       s.play().catch(()=>{});
     }
 
-    function playPlusFiveSound(){
-      if(!soundUnlocked) return;
-      const s = document.getElementById("soundPlusFive");
-      if(!s) return;
-      s.currentTime = 3.6;
-      s.play().catch(()=>{});
-    }
-
+function playPlusFiveSound(){
+  if(!soundUnlocked) return;
+  const s = document.getElementById("soundPlusFive");
+  if(!s) return;
+  s.currentTime = Math.min(3.6, (s.duration || 999) - 0.05);
+  s.play().catch(()=>{});
+}
     ["click", "touchstart", "keydown"].forEach(evt => {
       document.addEventListener(evt, unlockSound, { once: true });
     });
@@ -434,14 +432,10 @@ function drawTokens(grade, count, added = 0){
     const t = document.createElement("div");
     t.classList.add("token");
 
-    // Only NEW tokens get the drop animation
     if(added > 0 && i >= startDropIndex){
       t.classList.add("drop");
-
-      // Slightly slower drop for big adds (optional)
       if(added >= 5) t.style.animationDuration = "600ms";
     } else {
-      // Non-animated tokens still need positioning transform
       t.style.transform = "translate(-50%, -50%)";
     }
 
@@ -452,7 +446,6 @@ function drawTokens(grade, count, added = 0){
     layer.appendChild(t);
   }
 }
-
     function renderUI(){
       jarsEl.innerHTML = "";
       grades.forEach(g=>{
@@ -554,6 +547,7 @@ lastPoints[g] = v;
   </script>
 </body>
 </html>
+
 
 
 
