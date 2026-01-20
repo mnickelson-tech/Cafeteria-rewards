@@ -47,11 +47,7 @@
       box-shadow:0 12px 26px rgba(0,0,0,.25);
     }
     .jar h3{ margin:6px 0 10px; font-size:22px; }
-    .jar-lid{
-      width:104px; height:24px; margin:0 auto;
-      background:var(--red);
-      border-radius:12px 12px 0 0;
-      box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
+
     }
     .jar-body{
       width:100%; height:180px;
@@ -387,7 +383,6 @@
         card.className = "jar";
         card.innerHTML = `
           <h3>Grade ${g}</h3>
-          <div class="jar-lid"></div>
          <div class="jar-image-wrapper" id="jar_${g}">
   <img src="https://mnickelson-tech.github.io/cafeteria-rewards/campbell-jar.png"
        class="jar-image"
@@ -472,6 +467,7 @@
   </script>
 </body>
 </html>
+
 
 
 
