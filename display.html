@@ -8,39 +8,47 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap" rel="stylesheet">
 
   <style>
-    :root{ --navy:#0a1f44; --navy2:#102b5c; --red:#ff5252; }
-    :root{ --scale: min(1, calc(100vh / 900));
-}
+    :root{
+      --navy:#0a1f44;
+      --navy2:#102b5c;
+      --red:#ff5252;
+      --scale: min(1, calc(100vh / 900));
+    }
 
-body{
-  transform: scale(var(--scale));
-  transform-origin: top center;
-}
-html, body{
-  height: 100%;
-  overflow: hidden; /* removes scrollbars */
-}
+    html, body{
+      height: 100%;
+      overflow: hidden; /* removes scrollbars */
+    }
+
     body{
+      transform: scale(var(--scale));
+      transform-origin: top center;
+
       font-family:"Baloo 2", cursive;
       margin:0; padding:18px;
       color:#fff;
       background:linear-gradient(var(--navy), var(--navy2));
       text-align:center;
     }
-h1{
-  margin: 10px 0 0;
-  color: var(--red);
-  font-size: clamp(46px, 4vw, 66px);
-  letter-spacing: 0.5px;
-}
-.sub{
-  margin: 10px 0 18px;
-  opacity: .98;
-  font-size: clamp(22px, 1.8vw, 30px);
-}
+
+    h1{
+      margin: 10px 0 0;
+      color: var(--red);
+      font-size: clamp(46px, 4vw, 66px);
+      letter-spacing: 0.5px;
+    }
+    .sub{
+      margin: 10px 0 18px;
+      opacity: .98;
+      font-size: clamp(22px, 1.8vw, 30px);
+    }
 
     .toprow{
-      display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-items:center;
       margin: 10px 0 10px;
     }
     .badge{
@@ -51,73 +59,44 @@ h1{
       font-size:16px;
     }
 
-  .jars{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 across */
-  gap: 18px;
-  align-items: stretch;
-  margin-top: 14px;
-  max-width: 1500px;
-  margin-left: auto;
-  margin-right: auto;
-}
+    .jars{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 across */
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 14px;
+      max-width: 1500px;
+      margin-left: auto;
+      margin-right: auto;
     }
-  .jar{
-  background:#fff;
-  color:var(--navy);
-  border-radius:22px;
- padding: 14px;
-  box-shadow:0 12px 26px rgba(0,0,0,.25);
- min-height: 420px; /* keeps rows even */
-}
 
-.jar h3{
-  margin: 8px 0 10px;
-  font-size: clamp(22px, 2.2vw, 34px);
-  font-weight: 800;
-  letter-spacing: 0.2px;
-}
+    .jar{
+      background:#fff;
+      color:var(--navy);
+      border-radius:22px;
+      padding: 14px;
+      box-shadow:0 12px 26px rgba(0,0,0,.25);
+      min-height: 420px; /* keeps rows even */
     }
-    .jar-body{
-      width:100%; height:180px;
-      border:4px solid var(--navy);
-      border-radius:0 0 22px 22px;
-      margin-top:6px;
-      position:relative;
-      overflow:hidden;
-      background:#f7fbff;
+
+    .jar h3{
+      margin: 8px 0 10px;
+      font-size: clamp(22px, 2.2vw, 34px);
+      font-weight: 800;
+      letter-spacing: 0.2px;
     }
-    .fill{
-      position:absolute; left:0; right:0; bottom:0;
-      height:0%;
-      background:linear-gradient(#ffb3b3, var(--red));
-      opacity:.35;
-      transition:height .6s ease;
-      z-index:1;
+
+    .points{
+      font-size: clamp(34px, 3.2vw, 54px);
+      margin: 10px 0 0;
+      font-weight: 900;
     }
-    .tokens{
-      position:absolute; inset:0;
-      pointer-events:none;
-      z-index:3;
+
+    .tiny{
+      font-size: 13px;
+      opacity: .85;
+      margin-top: 4px;
     }
-    .token{
-      position:absolute;
-      width:16px; height:16px;
-      border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff7b0 0%, #ffd700 40%, #d4a400 100%);
-      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
-      transform: translate(-50%, -50%);
-    }
-.points{
-  font-size: clamp(34px, 3.2vw, 54px);
-  margin: 10px 0 0;
-  font-weight: 900;
-}
-  .tiny{
-  font-size: 13px;
-  opacity: .85;
-  margin-top: 4px;
-}
 
     .leaderboard{
       margin:18px auto 0;
@@ -184,7 +163,7 @@ h1{
       position: absolute;
       left: 10%;
       top: 42%;
-      width: 50%;
+      width: 55%;
       text-align: left;
       font-size: clamp(28px, 3.4vw, 52px);
       line-height: 1.1;
@@ -192,47 +171,60 @@ h1{
       font-weight: 800;
       text-shadow: 0 3px 0 rgba(255,255,255,0.9);
     }
+
     /* IMAGE-BASED JAR */
-.jar-image-wrapper{
-  max-width: 260px;   /* was ~200 */
-  margin: 0 auto;
-}
-.jar-image{
-  width: 100%;
-  display: block;
-  pointer-events: none;
-}
+    .jar-image-wrapper{
+      position: relative;      /* ✅ REQUIRED */
+      max-width: 260px;
+      margin: 0 auto;
+    }
+    .jar-image{
+      width: 100%;
+      display: block;
+      pointer-events: none;
+    }
 
-/* This invisible mask defines where tokens can appear */
-.jar-mask{
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  top: 20%;
-  bottom: 12%;
-  overflow: hidden;
-  pointer-events: none;
-}
+    /* Invisible mask defines where tokens can appear */
+    .jar-mask{
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      top: 22%;
+      bottom: 14%;
+      overflow: hidden;
+      pointer-events: none;
+    }
 
-/* Fill behind tokens */
-.jar-mask .fill{
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 0%;
-  background: linear-gradient(#ffb3b3, #ff5252);
-  opacity: 0.35;
-  transition: height 0.6s ease;
-  z-index: 1;
-}
+    /* Fill behind tokens */
+    .jar-mask .fill{
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0%;
+      background: linear-gradient(#ffb3b3, #ff5252);
+      opacity: 0.35;
+      transition: height 0.6s ease;
+      z-index: 1;
+      border-radius: 12px; /* nicer edges */
+    }
 
-/* Tokens on top */
-.jar-mask .tokens{
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-}
+    /* Tokens on top */
+    .jar-mask .tokens{
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .token{
+      position:absolute;
+      width:16px; height:16px;
+      border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff7b0 0%, #ffd700 40%, #d4a400 100%);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+      transform: translate(-50%, -50%);
+    }
   </style>
 </head>
 
@@ -289,15 +281,16 @@ h1{
 
     const grades = ["PK","K","1","2","3","4","5","6"];
     const gradeLabels = {
-  "PK": "Pre-K",
-  "K": "Kinder",
-  "1": "1st Grade",
-  "2": "2nd Grade",
-  "3": "3rd Grade",
-  "4": "4th Grade",
-  "5": "5th Grade",
-  "6": "6th Grade"
-};
+      "PK": "Pre-K",
+      "K": "Kinder",
+      "1": "1st Grade",
+      "2": "2nd Grade",
+      "3": "3rd Grade",
+      "4": "4th Grade",
+      "5": "5th Grade",
+      "6": "6th Grade"
+    };
+
     const maxPoints = 100;
     const MAX_VISIBLE_TOKENS = 80;
 
@@ -319,14 +312,13 @@ h1{
       const s5 = document.getElementById("soundPlusFive");
       if(!s1 || !s5) return;
 
-      s1.volume = 0.7; // softer sparkle
+      s1.volume = 0.7;
       s5.volume = 0.9;
 
-      // prime audio (must happen after a user click/tap/keypress)
       s1.currentTime = 0;
       s1.play().then(() => {
-        s1.pause(); s1.currentTime = 0;
-        s5.currentTime = 3.5;
+        s1.pause();
+        s1.currentTime = 0;
         soundUnlocked = true;
         statusEl.textContent = "✅ Live (Sound On)";
       }).catch(()=>{});
@@ -344,11 +336,10 @@ h1{
       if(!soundUnlocked) return;
       const s = document.getElementById("soundPlusFive");
       if(!s) return;
-      s.currentTime = 3.5;
+      s.currentTime = 0;
       s.play().catch(()=>{});
     }
 
-    // Unlock sound on first user interaction anywhere
     ["click", "touchstart", "keydown"].forEach(evt => {
       document.addEventListener(evt, unlockSound, { once: true });
     });
@@ -376,7 +367,7 @@ h1{
       const txt = document.getElementById("bannerText");
       if(!pop || !txt) return;
 
-    txt.textContent = `${gradeLabels[grade]}`;
+      txt.textContent = `${gradeLabels[grade]}`;
 
       pop.classList.remove("show");
       void pop.offsetWidth;
@@ -389,31 +380,42 @@ h1{
     }
 
     // ---- TOKENS ----
-    function slotPosition(jarEl, index){
-      const rect = jarEl.getBoundingClientRect();
-      const size = 16, padX = 14, padBottom = 10, gap = 4;
+    function slotPosition(areaEl, index){
+      const rect = areaEl.getBoundingClientRect();
+
+      const size = 16;
+      const gap = 4;
+      const padX = 6;
+      const padBottom = 6;
+
       const usableW = rect.width - padX*2;
       const cols = Math.max(1, Math.floor(usableW / (size + gap)));
+
       const row = Math.floor(index / cols);
       const col = index % cols;
+
       const x = padX + (col + 0.5) * (usableW / cols);
+
+      // stack from bottom up
       const yFromBottom = (row + 0.5) * (size + gap);
       const y = rect.height - padBottom - yFromBottom;
+
       const jitter = (n) => (Math.sin((index+1)*999) * 0.5 + 0.5) * n - n/2;
-      return { left: x + jitter(6), top: y + jitter(6) };
+      return { left: x + jitter(4), top: y + jitter(4) };
     }
 
     function drawTokens(grade, count){
-     const jarEl = document.querySelector(`#jar_${grade} .jar-mask`);
+      const maskEl = document.querySelector(`#jar_${grade} .jar-mask`);
       const layer = document.getElementById("tokens_" + grade);
-      if(!jarEl || !layer) return;
+      if(!maskEl || !layer) return;
 
       const visible = Math.min(count, MAX_VISIBLE_TOKENS);
       layer.innerHTML = "";
+
       for(let i=0;i<visible;i++){
         const t = document.createElement("div");
         t.className = "token";
-        const pos = slotPosition(jarEl, i);
+        const pos = slotPosition(maskEl, i);
         t.style.left = pos.left + "px";
         t.style.top  = pos.top  + "px";
         layer.appendChild(t);
@@ -426,17 +428,19 @@ h1{
         const card = document.createElement("div");
         card.className = "jar";
         card.innerHTML = `
-        <h3>${gradeLabels[g]}</h3>
-         <div class="jar-image-wrapper" id="jar_${g}">
-  <img src="https://mnickelson-tech.github.io/cafeteria-rewards/campbell-jar.png"
-       class="jar-image"
-       alt="Rewards Jar" />
+          <h3>${gradeLabels[g]}</h3>
 
-  <div class="jar-mask">
-    <div class="fill" id="fill_${g}"></div>
-    <div class="tokens" id="tokens_${g}"></div>
-  </div>
-</div>
+          <div class="jar-image-wrapper" id="jar_${g}">
+            <img
+              src="https://mnickelson-tech.github.io/cafeteria-rewards/campbell-jar.png"
+              class="jar-image"
+              alt="Rewards Jar"
+            />
+            <div class="jar-mask">
+              <div class="fill" id="fill_${g}"></div>
+              <div class="tokens" id="tokens_${g}"></div>
+            </div>
+          </div>
 
           <div class="points" id="pts_${g}">0</div>
           <div class="tiny">Tokens stack as points grow</div>
@@ -452,7 +456,7 @@ h1{
       sorted.forEach(g=>{
         const item = document.createElement("div");
         item.className = "lbitem";
-        item.innerHTML = `<strong>Grade ${g}</strong><br>${points[g]||0} points`;
+        item.innerHTML = `<strong>${gradeLabels[g]}</strong><br>${points[g]||0} points`;
         board.appendChild(item);
       });
     }
@@ -470,8 +474,14 @@ h1{
         const v = points[g] || 0;
         const ptsEl = document.getElementById("pts_"+g);
         const fillEl = document.getElementById("fill_"+g);
+
         if(ptsEl) ptsEl.textContent = v;
-        if(fillEl) fillEl.style.height = Math.min((v/maxPoints)*100, 100) + "%";
+
+        if(fillEl){
+          const pct = Math.min((v/maxPoints)*100, 100);
+          fillEl.style.height = (pct < 2 ? 0 : pct) + "%"; // ✅ prevents thin line
+        }
+
         drawTokens(g, v);
       });
 
@@ -483,7 +493,6 @@ h1{
 
         if(event.type === "add"){
           const amt = Number(event.amount ?? 1);
-
           confetti();
 
           if(amt >= 5){
@@ -511,22 +520,3 @@ h1{
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
