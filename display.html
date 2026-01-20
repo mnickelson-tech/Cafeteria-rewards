@@ -159,6 +159,50 @@
       font-weight: 800;
       text-shadow: 0 3px 0 rgba(255,255,255,0.9);
     }
+    /* IMAGE-BASED JAR */
+.jar-image-wrapper{
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  margin: 0 auto;
+}
+
+.jar-image{
+  width: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* This invisible mask defines where tokens can appear */
+.jar-mask{
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 20%;
+  bottom: 12%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Fill behind tokens */
+.jar-mask .fill{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0%;
+  background: linear-gradient(#ffb3b3, #ff5252);
+  opacity: 0.35;
+  transition: height 0.6s ease;
+  z-index: 1;
+}
+
+/* Tokens on top */
+.jar-mask .tokens{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
   </style>
 </head>
 
@@ -320,7 +364,7 @@
     }
 
     function drawTokens(grade, count){
-      const jarEl = document.getElementById("jar_" + grade);
+     const jarEl = document.querySelector(`#jar_${grade} .jar-mask`);
       const layer = document.getElementById("tokens_" + grade);
       if(!jarEl || !layer) return;
 
@@ -344,10 +388,17 @@
         card.innerHTML = `
           <h3>Grade ${g}</h3>
           <div class="jar-lid"></div>
-          <div class="jar-body" id="jar_${g}">
-            <div class="fill" id="fill_${g}"></div>
-            <div class="tokens" id="tokens_${g}"></div>
-          </div>
+         <div class="jar-image-wrapper" id="jar_${g}">
+  <img src="https://mnickelson-tech.github.io/cafeteria-rewards/campbell-jar.png"
+       class="jar-image"
+       alt="Rewards Jar" />
+
+  <div class="jar-mask">
+    <div class="fill" id="fill_${g}"></div>
+    <div class="tokens" id="tokens_${g}"></div>
+  </div>
+</div>
+
           <div class="points" id="pts_${g}">0</div>
           <div class="tiny">Tokens stack as points grow</div>
         `;
@@ -421,6 +472,7 @@
   </script>
 </body>
 </html>
+
 
 
 
