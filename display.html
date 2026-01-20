@@ -254,7 +254,17 @@
     };
 
     const grades = ["PK","K","1","2","3","4","5","6"];
-    const maxPoints = 50;
+    const gradeLabels = {
+  "PK": "Pre-K",
+  "K": "Kinder",
+  "1": "1st Grade",
+  "2": "2nd Grade",
+  "3": "3rd Grade",
+  "4": "4th Grade",
+  "5": "5th Grade",
+  "6": "6th Grade"
+};
+    const maxPoints = 100;
     const MAX_VISIBLE_TOKENS = 80;
 
     const jarsEl = document.getElementById("jars");
@@ -382,7 +392,7 @@
         const card = document.createElement("div");
         card.className = "jar";
         card.innerHTML = `
-          <h3>Grade ${g}</h3>
+        <h3>${gradeLabels[g]}</h3>
          <div class="jar-image-wrapper" id="jar_${g}">
   <img src="https://mnickelson-tech.github.io/cafeteria-rewards/campbell-jar.png"
        class="jar-image"
@@ -467,6 +477,7 @@
   </script>
 </body>
 </html>
+
 
 
 
