@@ -12,23 +12,26 @@
       --navy:#0a1f44;
       --navy2:#102b5c;
       --red:#ff5252;
-      --scale: min(1, calc(100vh / 900));
     }
 
     html, body{
-      height: 100%;
-      overflow: hidden; /* removes scrollbars */
+      height:100%;
+      margin:0;
     }
 
     body{
-      transform: scale(var(--scale));
-      transform-origin: top center;
-
       font-family:"Baloo 2", cursive;
-      margin:0; padding:18px;
+      padding:18px;
       color:#fff;
       background:linear-gradient(var(--navy), var(--navy2));
       text-align:center;
+
+      /* ✅ bring back scrolling */
+      overflow-y:auto;
+      overscroll-behavior: contain;
+
+      /* ✅ snap to each lunch matchup */
+      scroll-snap-type: y mandatory;
     }
 
     h1{
@@ -59,24 +62,47 @@
       font-size:16px;
     }
 
+    /* Container for all matchups */
     .jars{
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 across */
-      gap: 18px;
-      align-items: stretch;
-      margin-top: 14px;
+      display:flex;
+      flex-direction:column;
+      gap:26px;
       max-width: 1500px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 14px auto 24px;
+    }
+
+    /* One matchup per screen */
+    .matchup{
+      scroll-snap-align: start;
+      min-height: 100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:18px;
+      padding: 10px 0 22px;
+    }
+
+    .matchup-title{
+      color:#fff;
+      font-size: clamp(34px, 3.2vw, 56px);
+      margin: 0;
+    }
+
+    /* Two big jars side-by-side */
+    .matchup-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
     }
 
     .jar{
       background:#fff;
       color:var(--navy);
-      border-radius:22px;
-      padding: 14px;
+      border-radius:26px;
+      padding:18px;
       box-shadow:0 12px 26px rgba(0,0,0,.25);
-      min-height: 420px; /* keeps rows even */
+      min-height: 640px;  /* big for projector */
     }
 
     .jar h3{
@@ -96,29 +122,6 @@
       font-size: 13px;
       opacity: .85;
       margin-top: 4px;
-    }
-
-    .leaderboard{
-      margin:18px auto 0;
-      max-width:980px;
-      background:#fff;
-      color:var(--navy);
-      border-radius:22px;
-      padding:14px;
-      box-shadow:0 12px 26px rgba(0,0,0,.22);
-      text-align:left;
-    }
-    .leaderboard h2{ text-align:center; margin:6px 0 10px; }
-    .lbgrid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-      gap:10px;
-    }
-    .lbitem{
-      background:#f3f7ff;
-      border:2px dashed rgba(10,31,68,.25);
-      padding:10px 12px;
-      border-radius:16px;
     }
 
     /* Confetti */
@@ -174,8 +177,8 @@
 
     /* IMAGE-BASED JAR */
     .jar-image-wrapper{
-      position: relative;      /* ✅ REQUIRED */
-      max-width: 260px;
+      position: relative;
+      max-width: 380px; /* ✅ big jar image */
       margin: 0 auto;
     }
     .jar-image{
@@ -206,7 +209,7 @@
       opacity: 0.35;
       transition: height 0.6s ease;
       z-index: 1;
-      border-radius: 12px; /* nicer edges */
+      border-radius: 12px;
     }
 
     /* Tokens on top */
@@ -217,29 +220,29 @@
       pointer-events: none;
     }
 
-.token{
-  position:absolute;
-  width:22px;
-  height:22px;
-  border-radius:50%;
-  background:#c62828;
-  box-shadow:0 2px 4px rgba(0,0,0,0.25);
-}
-    
-.token.drop{
-  animation: dropIn 450ms ease-out;
-}
+    .token{
+      position:absolute;
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      background:#c62828;
+      box-shadow:0 2px 4px rgba(0,0,0,0.25);
+    }
 
-@keyframes dropIn{
-  0%{
-    transform: translate(-50%, -50%) translateY(-26px) scale(0.9);
-    opacity: 0;
-  }
-  100%{
-    transform: translate(-50%, -50%) translateY(0) scale(1);
-    opacity: 1;
-  }
-}
+    .token.drop{
+      animation: dropIn 450ms ease-out;
+    }
+
+    @keyframes dropIn{
+      0%{
+        transform: translate(-50%, -50%) translateY(-26px) scale(0.9);
+        opacity: 0;
+      }
+      100%{
+        transform: translate(-50%, -50%) translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 
@@ -272,12 +275,6 @@
 
   <div class="jars" id="jars"></div>
 
-  <div class="leaderboard">
-    <h2>🏆 Leaderboard</h2>
-    <div class="lbgrid" id="leaderboard"></div>
-    <div class="tiny">This updates live when teachers add points.</div>
-  </div>
-
   <!-- Firebase (v9 compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -295,6 +292,14 @@
     };
 
     const grades = ["PK","K","1","2","3","4","5","6"];
+
+    const matchups = [
+      { id:"PKK", title:"🍎 Pre-K vs Kinder", left:"PK", right:"K" },
+      { id:"12",  title:"🍌 1st vs 2nd",      left:"1",  right:"2" },
+      { id:"34",  title:"🥪 3rd vs 4th",      left:"3",  right:"4" },
+      { id:"56",  title:"🍕 5th vs 6th",      left:"5",  right:"6" }
+    ];
+
     const gradeLabels = {
       "PK": "Pre-K",
       "K": "Kinder",
@@ -347,13 +352,14 @@
       s.play().catch(()=>{});
     }
 
-function playPlusFiveSound(){
-  if(!soundUnlocked) return;
-  const s = document.getElementById("soundPlusFive");
-  if(!s) return;
-  s.currentTime = Math.min(3.6, (s.duration || 999) - 0.05);
-  s.play().catch(()=>{});
-}
+    function playPlusFiveSound(){
+      if(!soundUnlocked) return;
+      const s = document.getElementById("soundPlusFive");
+      if(!s) return;
+      s.currentTime = Math.min(3.6, (s.duration || 999) - 0.05);
+      s.play().catch(()=>{});
+    }
+
     ["click", "touchstart", "keydown"].forEach(evt => {
       document.addEventListener(evt, unlockSound, { once: true });
     });
@@ -418,84 +424,92 @@ function playPlusFiveSound(){
       return { left: x + jitter(4), top: y + jitter(4) };
     }
 
-function drawTokens(grade, count, added = 0){
-  const maskEl = document.querySelector(`#jar_${grade} .jar-mask`);
-  const layer = document.getElementById("tokens_" + grade);
-  if(!maskEl || !layer) return;
+    function drawTokens(grade, count, added = 0){
+      const maskEl = document.querySelector(`#jar_${grade} .jar-mask`);
+      const layer = document.getElementById("tokens_" + grade);
+      if(!maskEl || !layer) return;
 
-  const visible = Math.min(count, MAX_VISIBLE_TOKENS);
-  layer.innerHTML = "";
+      const visible = Math.min(count, MAX_VISIBLE_TOKENS);
+      layer.innerHTML = "";
 
-  const startDropIndex = Math.max(0, visible - added);
+      const startDropIndex = Math.max(0, visible - added);
 
-  for(let i = 0; i < visible; i++){
-    const t = document.createElement("div");
-    t.classList.add("token");
+      for(let i = 0; i < visible; i++){
+        const t = document.createElement("div");
+        t.classList.add("token");
 
-    if(added > 0 && i >= startDropIndex){
-      t.classList.add("drop");
-      if(added >= 5) t.style.animationDuration = "600ms";
-    } else {
-      t.style.transform = "translate(-50%, -50%)";
+        if(added > 0 && i >= startDropIndex){
+          t.classList.add("drop");
+          if(added >= 5) t.style.animationDuration = "600ms";
+        } else {
+          t.style.transform = "translate(-50%, -50%)";
+        }
+
+        const pos = slotPosition(maskEl, i);
+        t.style.left = pos.left + "px";
+        t.style.top  = pos.top  + "px";
+
+        layer.appendChild(t);
+      }
     }
 
-    const pos = slotPosition(maskEl, i);
-    t.style.left = pos.left + "px";
-    t.style.top  = pos.top  + "px";
-
-    layer.appendChild(t);
-  }
-}
     function renderUI(){
       jarsEl.innerHTML = "";
-      grades.forEach(g=>{
-        const card = document.createElement("div");
-        card.className = "jar";
-        card.innerHTML = `
-          <h3>${gradeLabels[g]}</h3>
 
-          <div class="jar-image-wrapper" id="jar_${g}">
-            <img
-              src="https://mnickelson-tech.github.io/cafeteria-rewards/campbell-jar.png"
-              class="jar-image"
-              alt="Rewards Jar"
-            />
-            <div class="jar-mask">
-              <div class="fill" id="fill_${g}"></div>
-              <div class="tokens" id="tokens_${g}"></div>
-            </div>
-          </div>
+      matchups.forEach(m => {
+        const section = document.createElement("section");
+        section.className = "matchup";
+        section.id = "matchup_" + m.id;
 
-          <div class="points" id="pts_${g}">0</div>
-          <div class="tiny">Tokens stack as points grow</div>
+        section.innerHTML = `
+          <h2 class="matchup-title">${m.title}</h2>
+          <div class="matchup-grid" id="grid_${m.id}"></div>
         `;
-        jarsEl.appendChild(card);
-      });
-    }
 
-    function updateLeaderboard(points){
-      const board = document.getElementById("leaderboard");
-      board.innerHTML = "";
-      const sorted = [...grades].sort((a,b)=>(points[b]||0)-(points[a]||0));
-      sorted.forEach(g=>{
-        const item = document.createElement("div");
-        item.className = "lbitem";
-        item.innerHTML = `<strong>${gradeLabels[g]}</strong><br>${points[g]||0} points`;
-        board.appendChild(item);
+        jarsEl.appendChild(section);
+
+        const grid = section.querySelector("#grid_" + m.id);
+        [m.left, m.right].forEach(g => {
+          const card = document.createElement("div");
+          card.className = "jar";
+          card.innerHTML = `
+            <h3>${gradeLabels[g]}</h3>
+
+            <div class="jar-image-wrapper" id="jar_${g}">
+              <img
+                src="https://mnickelson-tech.github.io/cafeteria-rewards/campbell-jar.png"
+                class="jar-image"
+                alt="Rewards Jar"
+              />
+              <div class="jar-mask">
+                <div class="fill" id="fill_${g}"></div>
+                <div class="tokens" id="tokens_${g}"></div>
+              </div>
+            </div>
+
+            <div class="points" id="pts_${g}">0</div>
+            <div class="tiny">Tokens stack as points grow</div>
+          `;
+          grid.appendChild(card);
+        });
       });
     }
 
     let lastTs = 0;
+    let lastPoints = {};
+
     renderUI();
 
-   let lastPoints = {}; ref.on("value", snap=>{
+    ref.on("value", snap=>{
       statusEl.textContent = soundUnlocked ? "✅ Live (Sound On)" : "✅ Live";
+
       const data = snap.val() || {};
       const points = data.points || {};
       const event = data.lastEvent || null;
 
       grades.forEach(g=>{
         const v = points[g] || 0;
+
         const ptsEl = document.getElementById("pts_"+g);
         const fillEl = document.getElementById("fill_"+g);
 
@@ -503,16 +517,14 @@ function drawTokens(grade, count, added = 0){
 
         if(fillEl){
           const pct = Math.min((v/maxPoints)*100, 100);
-          fillEl.style.height = (pct < 2 ? 0 : pct) + "%"; // ✅ prevents thin line
+          fillEl.style.height = (pct < 2 ? 0 : pct) + "%";
         }
 
-       const prev = lastPoints[g] || 0;
-const added = Math.max(0, v - prev);
-drawTokens(g, v, added);
-lastPoints[g] = v;
+        const prev = lastPoints[g] || 0;
+        const added = Math.max(0, v - prev);
+        drawTokens(g, v, added);
+        lastPoints[g] = v;
       });
-
-      updateLeaderboard(points);
 
       if(event && event.ts && event.ts > lastTs){
         lastTs = event.ts;
@@ -541,15 +553,9 @@ lastPoints[g] = v;
       ref.get().then(snap=>{
         const data = snap.val() || {};
         const points = (data.points || {});
-        grades.forEach(g => drawTokens(g, points[g]||0));
+        grades.forEach(g => drawTokens(g, points[g]||0, 0));
       });
     });
   </script>
 </body>
 </html>
-
-
-
-
-
-
