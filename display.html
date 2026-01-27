@@ -16,16 +16,20 @@
 .vs-wrap{
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;                 /* 👈 start at top of jars */
+  bottom: 0;              /* 👈 end at bottom of jars */
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;    /* centers VS vertically inside jar height */
+  justify-content: center;
   z-index: 5;
   pointer-events: none;
 }
 
 .vs-wrap img{
-  width: min(340px, 28vw);   /* 🔥 BIG */
-  max-width: 420px;
-  height: auto;
+  height: 75%;            /* 👈 lines up with white card height */
+  max-height: 520px;      /* safety for large screens */
+  width: auto;
   filter: drop-shadow(0 0 22px rgba(255,82,82,0.9));
 }
     html, body{
@@ -103,11 +107,11 @@
     }
 
 .matchup-grid{
-  position: relative;              /* 👈 anchor for VS */
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;  /* jars only */
-  gap: 80px;                       /* big separation */
-  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: stretch;   /* 👈 IMPORTANT */
 }
     .jar{
       background:#fff;
@@ -605,6 +609,7 @@ renderUI();
   </script>
 </body>
 </html>
+
 
 
 
