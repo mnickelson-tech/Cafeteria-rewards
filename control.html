@@ -29,23 +29,6 @@
       padding: 14px;
     }
 
-    .authbar{
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-bottom: 10px;
-    }
-    .pill{
-      background: rgba(255,255,255,.12);
-      border: 2px solid rgba(255,255,255,.18);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 14px;
-      opacity: .98;
-    }
-
     .grades{
       display:grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -84,14 +67,12 @@
     .add{ background: var(--red); color:#fff; }
     .add5{ background: #ff8a65; color:#fff; }
     .reset{ background: #0a1f44; color:#fff; }
-    .signin{ background: #fff; color: var(--navy); border: 2px solid rgba(255,255,255,.18); }
-    .signout{ background: rgba(255,255,255,.18); color:#fff; border: 2px solid rgba(255,255,255,.18); }
 
     button[disabled]{
-      opacity: .45;
+      opacity:.45;
       cursor:not-allowed;
-      transform:none;
       box-shadow:none;
+      transform:none;
     }
 
     .status{
@@ -117,28 +98,101 @@
       font-size: 15px;
       width: 160px;
     }
-
     .tiny{ font-size: 13px; opacity: .85; margin-top: 10px; }
+
+    /* --- PIN GATE OVERLAY --- */
+    .pinGate{
+      position:fixed;
+      inset:0;
+      z-index:10000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(10,31,68,0.92);
+    }
+    .pinCard{
+      width:min(520px,92vw);
+      background:#fff;
+      color:var(--navy);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:0 18px 40px rgba(0,0,0,0.35);
+      text-align:center;
+    }
+    .pinTitle{ font-size:28px; font-weight:900; }
+    .pinSub{ margin:10px 0 14px; font-size:16px; opacity:.85; }
+    .pinInput{
+      width:min(320px,90%);
+      font-size:26px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:2px solid rgba(10,31,68,0.2);
+      outline:none;
+      text-align:center;
+    }
+    .pinRow{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    .pinBtn{
+      font-size:18px;
+      font-weight:900;
+      padding:10px 16px;
+      border-radius:14px;
+      border:none;
+      background:var(--red);
+      color:#fff;
+      cursor:pointer;
+    }
+    .pinClear{
+      font-size:18px;
+      font-weight:900;
+      padding:10px 16px;
+      border-radius:14px;
+      border:2px solid rgba(10,31,68,0.2);
+      background:#fff;
+      color:var(--navy);
+      cursor:pointer;
+    }
+    .pinMsg{
+      margin-top:12px;
+      color:#b00020;
+      font-weight:800;
+      min-height:20px;
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- PIN gate -->
+  <div id="pinGate" class="pinGate">
+    <div class="pinCard">
+      <div class="pinTitle">🔒 Staff PIN Required</div>
+      <div class="pinSub">Enter the cafeteria rewards PIN to add points.</div>
+
+      <input id="pinInput" class="pinInput" type="password" inputmode="numeric" placeholder="Enter PIN" />
+
+      <div class="pinRow">
+        <button id="pinBtn" class="pinBtn">Unlock</button>
+        <button id="pinClear" class="pinClear">Clear</button>
+      </div>
+
+      <div id="pinMsg" class="pinMsg"></div>
+    </div>
+  </div>
+
   <h1>🐦 Teacher Control</h1>
   <div class="sub">Tap points when you see awesome cafeteria behavior!</div>
 
   <div class="panel">
-
-    <!-- Auth UI -->
-    <div class="authbar">
-      <span class="pill" id="authState">Not signed in</span>
-      <button class="signin" id="btnSignIn">Sign in with Google</button>
-      <button class="signout" id="btnSignOut" style="display:none;">Sign out</button>
-    </div>
-
-    <!-- Optional: still require a PIN to reset -->
+    <!-- Optional reset PIN -->
     <div class="pinbox">
       <span>Reset PIN:</span>
-      <input id="pin" type="password" placeholder="enter pin" />
+      <input id="resetPin" type="password" placeholder="enter pin" />
       <span class="tiny">(Only needed to reset)</span>
     </div>
 
@@ -151,7 +205,6 @@
   <!-- Firebase (v9 compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -165,28 +218,89 @@
       measurementId: "G-2VJF6ER094"
     };
 
-    // Optional: keep reset protected with a staff-known PIN
+    // ✅ PIN to USE the page (enter once; stays unlocked for TTL)
+    const STAFF_PIN = "2025";
+
+    // ✅ PIN to RESET (can be same as staff pin, or different)
     const RESET_PIN = "2025";
+
+    // How long the page stays unlocked (per tab/device)
+    const PIN_TTL_MINUTES = 30;
 
     const grades = ["PK","K","1","2","3","4","5","6"];
     const gradeLabels = {
-      "PK":"Pre-K","K":"Kinder","1":"1st Grade","2":"2nd Grade","3":"3rd Grade","4":"4th Grade","5":"5th Grade","6":"6th Grade"
+      "PK":"Pre-K","K":"Kinder","1":"1st Grade","2":"2nd Grade","3":"3rd Grade",
+      "4":"4th Grade","5":"5th Grade","6":"6th Grade"
     };
 
     const statusEl = document.getElementById("status");
     const gradesEl = document.getElementById("grades");
-    const resetPinInput = document.getElementById("pin");
+    const resetPinEl = document.getElementById("resetPin");
 
-    const authStateEl = document.getElementById("authState");
-    const btnSignIn = document.getElementById("btnSignIn");
-    const btnSignOut = document.getElementById("btnSignOut");
-
+    // Firebase refs
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const ref = db.ref("rewards");
-    const auth = firebase.auth();
+    const ref = db.ref("rewards"); // rewards/points + rewards/lastEvent
 
-    // --- Build cards ---
+    // ----- PIN Gate logic -----
+    function isPinStillValid(){
+      const until = Number(sessionStorage.getItem("caf_rewards_pin_until") || 0);
+      return Date.now() < until;
+    }
+
+    function lockGate(){
+      sessionStorage.removeItem("caf_rewards_pin_until");
+      document.getElementById("pinGate").style.display = "flex";
+      setButtonsEnabled(false);
+    }
+
+    function unlockGate(){
+      sessionStorage.setItem("caf_rewards_pin_until", String(Date.now() + PIN_TTL_MINUTES*60*1000));
+      document.getElementById("pinGate").style.display = "none";
+      setButtonsEnabled(true);
+    }
+
+    function initPinGate(){
+      const gate  = document.getElementById("pinGate");
+      const input = document.getElementById("pinInput");
+      const btn   = document.getElementById("pinBtn");
+      const clear = document.getElementById("pinClear");
+      const msg   = document.getElementById("pinMsg");
+
+      if(isPinStillValid()){
+        gate.style.display = "none";
+        setButtonsEnabled(true);
+        return;
+      }
+
+      setButtonsEnabled(false);
+
+      function attempt(){
+        msg.textContent = "";
+        if(input.value === STAFF_PIN){
+          unlockGate();
+        }else{
+          msg.textContent = "Incorrect PIN. Please try again.";
+          input.value = "";
+          input.focus();
+        }
+      }
+
+      btn.addEventListener("click", attempt);
+      clear.addEventListener("click", ()=>{ input.value=""; msg.textContent=""; input.focus(); });
+      input.addEventListener("keydown", (e)=>{ if(e.key === "Enter") attempt(); });
+
+      // If they come back later and TTL expired, re-lock
+      document.addEventListener("visibilitychange", ()=>{
+        if(document.visibilityState === "visible" && !isPinStillValid()){
+          lockGate();
+        }
+      });
+
+      input.focus();
+    }
+
+    // ----- UI -----
     function makeCard(g){
       const d = document.createElement("div");
       d.className = "card";
@@ -200,78 +314,19 @@
       `;
       return d;
     }
+
     grades.forEach(g => gradesEl.appendChild(makeCard(g)));
 
     function setButtonsEnabled(enabled){
-      document.querySelectorAll('button[data-action="add"], button[data-action="reset"]').forEach(b=>{
+      document.querySelectorAll('button[data-action]').forEach(b=>{
         b.disabled = !enabled;
       });
     }
 
-    // default: locked until auth
-    setButtonsEnabled(false);
-
-    // --- Auth (Google) ---
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    async function signIn(){
-      // Redirect is more reliable on phones (popup blockers)
-      try{
-        await auth.signInWithRedirect(provider);
-      }catch(e){
-        console.error(e);
-        alert("Sign-in failed. If this is a district device, Google sign-in may be blocked.");
-      }
-    }
-
-    async function signOut(){
-      try{
-        await auth.signOut();
-      }catch(e){
-        console.error(e);
-      }
-    }
-
-    btnSignIn.addEventListener("click", signIn);
-    btnSignOut.addEventListener("click", signOut);
-
-    // handle redirect return (safe even if nothing to handle)
-    auth.getRedirectResult().catch(console.warn);
-
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        const name = user.displayName || "Signed in";
-        const email = user.email || "";
-        authStateEl.textContent = `✅ ${name}${email ? " • " + email : ""}`;
-        btnSignOut.style.display = "";
-        btnSignIn.style.display = "none";
-        setButtonsEnabled(true);
-      }else{
-        authStateEl.textContent = "Not signed in";
-        btnSignOut.style.display = "none";
-        btnSignIn.style.display = "";
-        setButtonsEnabled(false);
-      }
-    });
-auth.onAuthStateChanged(user => {
-  if (user) {
-    // User is signed in — now it's safe to touch the database
-    ref.child("points").get()
-      .then(() => {
-        statusEl.textContent = "✅ Connected";
-      })
-      .catch(err => {
-        statusEl.textContent = "⚠️ Permission denied";
-        console.error("DB error:", err);
-      });
-  } else {
-    statusEl.textContent = "⚠️ Not connected";
-  }
-});
-    // --- Firebase actions ---
+    // ----- Actions -----
     function addPoints(grade, amount){
-      if(!auth.currentUser){
-        alert("Please sign in first.");
+      if(!isPinStillValid()){
+        lockGate();
         return;
       }
 
@@ -280,7 +335,7 @@ auth.onAuthStateChanged(user => {
 
       pRef.transaction(current => (current || 0) + amount, (error, committed) => {
         if(error){
-          statusEl.textContent = "⚠️ Permission / Error sending";
+          statusEl.textContent = "⚠️ Error sending";
           console.error(error);
           return;
         }
@@ -293,14 +348,16 @@ auth.onAuthStateChanged(user => {
     }
 
     function resetGrade(grade){
-      if(!auth.currentUser){
-        alert("Please sign in first.");
+      if(!isPinStillValid()){
+        lockGate();
         return;
       }
-      if(RESET_PIN && resetPinInput.value !== RESET_PIN){
-        alert("Wrong PIN (ask an administrator).");
+
+      if(RESET_PIN && resetPinEl.value !== RESET_PIN){
+        alert("Wrong Reset PIN (ask an administrator).");
         return;
       }
+
       if(confirm("Reset " + gradeLabels[grade] + " for the week?")){
         ref.child("points").child(grade).set(0);
         ref.child("lastEvent").set({ type:"reset", grade, ts: Date.now() });
@@ -309,7 +366,7 @@ auth.onAuthStateChanged(user => {
       }
     }
 
-    // button actions (no inline onclick)
+    // Handle button clicks
     document.addEventListener("click", (e)=>{
       const btn = e.target.closest("button[data-action]");
       if(!btn) return;
@@ -325,8 +382,16 @@ auth.onAuthStateChanged(user => {
       }
     });
 
-   
+    // Connection indicator (reads whole rewards node)
+    ref.on("value", ()=>{
+      statusEl.textContent = "✅ Connected";
+    }, (err)=>{
+      statusEl.textContent = "⚠️ Not connected";
+      console.error(err);
+    });
+
+    // Start
+    initPinGate();
   </script>
 </body>
 </html>
-
