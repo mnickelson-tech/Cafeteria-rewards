@@ -9,6 +9,7 @@
 
   <style>
     :root{ --navy:#0a1f44; --navy2:#102b5c; --red:#ff5252; }
+
     body{
       font-family:"Baloo 2", cursive;
       margin:0; padding:16px;
@@ -16,65 +17,10 @@
       color:#fff;
       text-align:center;
     }
+
     h1{ margin:6px 0 0; color:var(--red); font-size:34px; }
     .sub{ margin:6px 0 14px; opacity:.95; }
 
-    <div id="pinGate" style="
-  position:fixed; inset:0; z-index:10000;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(10,31,68,0.92);
-">
-  <div style="
-    width:min(520px,92vw);
-    background:#fff; color:#0a1f44;
-    border-radius:22px;
-    padding:22px;
-    box-shadow:0 18px 40px rgba(0,0,0,0.35);
-    text-align:center;
-    font-family:inherit;
-  ">
-    <div style="font-size:28px; font-weight:900;">🔒 Staff PIN Required</div>
-    <div style="margin:10px 0 14px; font-size:16px; opacity:.85;">
-      Enter the cafeteria rewards PIN to add points.
-    </div>
-
-    <input id="pinInput" type="password" inputmode="numeric" placeholder="Enter PIN"
-      style="
-        width: min(320px, 90%);
-        font-size:26px;
-        padding:12px 14px;
-        border-radius:14px;
-        border:2px solid rgba(10,31,68,0.2);
-        outline:none;
-        text-align:center;
-      "
-    />
-
-    <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
-      <button id="pinBtn" style="
-        font-size:18px; font-weight:900;
-        padding:10px 16px;
-        border-radius:14px;
-        border:none;
-        background:#ff5252;
-        color:#fff;
-        cursor:pointer;
-      ">Unlock</button>
-
-      <button id="pinClear" style="
-        font-size:18px; font-weight:900;
-        padding:10px 16px;
-        border-radius:14px;
-        border:2px solid rgba(10,31,68,0.2);
-        background:#fff;
-        color:#0a1f44;
-        cursor:pointer;
-      ">Clear</button>
-    </div>
-
-    <div id="pinMsg" style="margin-top:12px; color:#b00020; font-weight:800;"></div>
-  </div>
-</div>
     .panel{
       max-width:900px;
       margin: 0 auto;
@@ -146,9 +92,100 @@
       width: 160px;
     }
     .tiny{ font-size: 13px; opacity: .85; margin-top: 10px; }
+
+    /* --- PIN GATE (overlay) --- */
+    .pinGate{
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10,31,68,0.92);
+    }
+    .pinCard{
+      width: min(520px, 92vw);
+      background: #fff;
+      color: var(--navy);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+      text-align: center;
+    }
+    .pinTitle{
+      font-size: 28px;
+      font-weight: 900;
+    }
+    .pinSub{
+      margin: 10px 0 14px;
+      font-size: 16px;
+      opacity: .85;
+    }
+    .pinInput{
+      width: min(320px, 90%);
+      font-size: 26px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 2px solid rgba(10,31,68,0.2);
+      outline: none;
+      text-align: center;
+    }
+    .pinRow{
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .pinBtn{
+      font-size: 18px;
+      font-weight: 900;
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: none;
+      background: var(--red);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 10px 18px rgba(0,0,0,.15);
+    }
+    .pinClear{
+      font-size: 18px;
+      font-weight: 900;
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 2px solid rgba(10,31,68,0.2);
+      background: #fff;
+      color: var(--navy);
+      cursor: pointer;
+      box-shadow: 0 10px 18px rgba(0,0,0,.08);
+    }
+    .pinMsg{
+      margin-top: 12px;
+      color: #b00020;
+      font-weight: 800;
+      min-height: 20px;
+    }
   </style>
 </head>
+
 <body>
+
+  <!-- ✅ PIN GATE belongs in BODY (not inside <style>) -->
+  <div id="pinGate" class="pinGate">
+    <div class="pinCard">
+      <div class="pinTitle">🔒 Staff PIN Required</div>
+      <div class="pinSub">Enter the cafeteria rewards PIN to add points.</div>
+
+      <input id="pinInput" class="pinInput" type="password" inputmode="numeric" placeholder="Enter PIN" />
+
+      <div class="pinRow">
+        <button id="pinBtn" class="pinBtn">Unlock</button>
+        <button id="pinClear" class="pinClear">Clear</button>
+      </div>
+
+      <div id="pinMsg" class="pinMsg"></div>
+    </div>
+  </div>
+
   <h1>🐦 Teacher Control</h1>
   <div class="sub">Tap points when you see awesome cafeteria behavior!</div>
 
@@ -181,22 +218,26 @@
       measurementId: "G-2VJF6ER094"
     };
 
-    // CHANGE THIS PIN to something staff know (or set "" to disable)
-    const RESET_PIN = "2025";
+    // --- PINS ---
+    const STAFF_PIN = "2025";     // ✅ required to use the page
+    const RESET_PIN = "2025";     // ✅ required only for resets (can be different)
+    const PIN_TTL_MINUTES = 30;   // how long the page stays unlocked
+
     const grades = ["PK","K","1","2","3","4","5","6"];
     const gradeLabels = {
-  "PK": "Pre-K",
-  "K": "Kinder",
-  "1": "1st Grade",
-  "2": "2nd Grade",
-  "3": "3rd Grade",
-  "4": "4th Grade",
-  "5": "5th Grade",
-  "6": "6th Grade"
-};
+      "PK": "Pre-K",
+      "K": "Kinder",
+      "1": "1st Grade",
+      "2": "2nd Grade",
+      "3": "3rd Grade",
+      "4": "4th Grade",
+      "5": "5th Grade",
+      "6": "6th Grade"
+    };
+
     const statusEl = document.getElementById("status");
     const gradesEl = document.getElementById("grades");
-    const pinInput = document.getElementById("pin");
+    const resetPinInput = document.getElementById("pin");
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -206,7 +247,7 @@
       const d = document.createElement("div");
       d.className = "card";
       d.innerHTML = `
-       <div class="gtitle"><strong>${gradeLabels[g]}</strong></div>
+        <div class="gtitle"><strong>${gradeLabels[g]}</strong></div>
         <div class="row">
           <button class="add"  onclick="addPoints('${g}', 1)">+1</button>
           <button class="add5" onclick="addPoints('${g}', 5)">+5</button>
@@ -218,11 +259,73 @@
 
     grades.forEach(g=> gradesEl.appendChild(makeCard(g)));
 
+    // --- Simple PIN gate helpers ---
+    function isPinStillValid(){
+      const until = Number(sessionStorage.getItem("caf_rewards_pin_until") || 0);
+      return Date.now() < until;
+    }
+
+    function lockGate(){
+      sessionStorage.removeItem("caf_rewards_pin_until");
+      const gate = document.getElementById("pinGate");
+      if(gate) gate.style.display = "flex";
+    }
+
+    function unlockGate(){
+      sessionStorage.setItem("caf_rewards_pin_until", String(Date.now() + PIN_TTL_MINUTES*60*1000));
+      const gate = document.getElementById("pinGate");
+      if(gate) gate.style.display = "none";
+    }
+
+    function initPinGate(){
+      const gate  = document.getElementById("pinGate");
+      const input = document.getElementById("pinInput");
+      const btn   = document.getElementById("pinBtn");
+      const clear = document.getElementById("pinClear");
+      const msg   = document.getElementById("pinMsg");
+
+      if(!gate || !input || !btn || !clear || !msg) return;
+
+      if(isPinStillValid()){
+        gate.style.display = "none";
+        return;
+      }
+
+      function attempt(){
+        msg.textContent = "";
+        if(input.value === STAFF_PIN){
+          unlockGate();
+        }else{
+          msg.textContent = "Incorrect PIN. Please try again.";
+          input.value = "";
+          input.focus();
+        }
+      }
+
+      btn.addEventListener("click", attempt);
+      clear.addEventListener("click", ()=>{ input.value=""; msg.textContent=""; input.focus(); });
+      input.addEventListener("keydown", (e)=>{ if(e.key === "Enter") attempt(); });
+
+      document.addEventListener("visibilitychange", ()=>{
+        if(document.visibilityState === "visible" && !isPinStillValid()) lockGate();
+      });
+
+      input.focus();
+    }
+
+    initPinGate();
+
+    // --- Firebase actions ---
     function addPoints(grade, amount){
+      // Extra guard (in case someone removes the overlay in DevTools)
+      if(!isPinStillValid()){
+        lockGate();
+        return;
+      }
+
       statusEl.textContent = "Sending…";
       const pRef = ref.child("points").child(grade);
 
-      // Transaction = safe even if multiple teachers tap at once
       pRef.transaction(current => (current || 0) + amount, (error, committed) => {
         if(error){
           statusEl.textContent = "⚠️ Error sending";
@@ -231,85 +334,28 @@
         }
         if(committed){
           ref.child("lastEvent").set({ type:"add", grade, amount, ts: Date.now() });
-          statusEl.textContent = `✅ Added ${amount} to Grade ${grade}`;
+          statusEl.textContent = `✅ Added ${amount} to ${gradeLabels[grade]}`;
           setTimeout(()=> statusEl.textContent = "✅ Connected", 1200);
         }
       });
     }
 
     function resetGrade(grade){
-      if(RESET_PIN && pinInput.value !== RESET_PIN){
+      if(RESET_PIN && resetPinInput.value !== RESET_PIN){
         alert("Wrong PIN (ask an administrator).");
         return;
       }
-      if(confirm("Reset Grade " + grade + " for the week?")){
+      if(confirm("Reset " + gradeLabels[grade] + " for the week?")){
         ref.child("points").child(grade).set(0);
         ref.child("lastEvent").set({ type:"reset", grade, ts: Date.now() });
-        statusEl.textContent = `🔁 Reset Grade ${grade}`;
+        statusEl.textContent = `🔁 Reset ${gradeLabels[grade]}`;
         setTimeout(()=> statusEl.textContent = "✅ Connected", 1200);
       }
     }
-    // --- Simple PIN gate ---
-const STAFF_PIN = "2025";          // <- change this
-const PIN_TTL_MINUTES = 30;        // how long it stays unlocked
 
-function isPinStillValid() {
-  const until = Number(sessionStorage.getItem("caf_rewards_pin_until") || 0);
-  return Date.now() < until;
-}
-
-function lockGate() {
-  sessionStorage.removeItem("caf_rewards_pin_until");
-  const gate = document.getElementById("pinGate");
-  if (gate) gate.style.display = "flex";
-}
-
-function unlockGate() {
-  sessionStorage.setItem("caf_rewards_pin_until", String(Date.now() + PIN_TTL_MINUTES*60*1000));
-  const gate = document.getElementById("pinGate");
-  if (gate) gate.style.display = "none";
-}
-
-function initPinGate(){
-  const gate = document.getElementById("pinGate");
-  const input = document.getElementById("pinInput");
-  const btn = document.getElementById("pinBtn");
-  const clear = document.getElementById("pinClear");
-  const msg = document.getElementById("pinMsg");
-
-  if (!gate || !input || !btn || !clear) return;
-
-  if (isPinStillValid()) {
-    gate.style.display = "none";
-    return;
-  }
-
-  function attempt(){
-    msg.textContent = "";
-    if (input.value === STAFF_PIN) {
-      unlockGate();
-    } else {
-      msg.textContent = "Incorrect PIN. Please try again.";
-      input.value = "";
-      input.focus();
-    }
-  }
-
-  btn.addEventListener("click", attempt);
-  clear.addEventListener("click", () => { input.value=""; msg.textContent=""; input.focus(); });
-  input.addEventListener("keydown", (e)=>{ if (e.key === "Enter") attempt(); });
-
-  // Optional: re-lock if tab is left for a while
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && !isPinStillValid()) lockGate();
-  });
-
-  input.focus();
-}
-
-initPinGate();
-
-// Optional: if you want a manual "Lock" button somewhere later, call lockGate()
+    // Attach functions to window because buttons use onclick=""
+    window.addPoints = addPoints;
+    window.resetGrade = resetGrade;
 
     ref.on("value", ()=>{
       statusEl.textContent = "✅ Connected";
@@ -320,5 +366,3 @@ initPinGate();
   </script>
 </body>
 </html>
-
-
