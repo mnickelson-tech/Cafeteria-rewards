@@ -253,7 +253,21 @@
         setButtonsEnabled(false);
       }
     });
-
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // User is signed in — now it's safe to touch the database
+    ref.child("points").get()
+      .then(() => {
+        statusEl.textContent = "✅ Connected";
+      })
+      .catch(err => {
+        statusEl.textContent = "⚠️ Permission denied";
+        console.error("DB error:", err);
+      });
+  } else {
+    statusEl.textContent = "⚠️ Not connected";
+  }
+});
     // --- Firebase actions ---
     function addPoints(grade, amount){
       if(!auth.currentUser){
@@ -311,12 +325,8 @@
       }
     });
 
-    ref.on("value", ()=>{
-      statusEl.textContent = "✅ Connected";
-    }, (err)=>{
-      statusEl.textContent = "⚠️ Not connected";
-      console.error(err);
-    });
+   
   </script>
 </body>
 </html>
+
